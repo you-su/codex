@@ -29,13 +29,16 @@ with zipfile.ZipFile(archive) as z:
     if z.testzip() is not None:
         raise RuntimeError('Python runtime archive failed integrity check')
     z.extractall(RUNTIME)
-(RUNTIME / 'python312._pth').write_text('python312.zip\n.\n..\n', encoding='ascii')
+(RUNTIME / 'python312._pth').write_text('python312.zip\n.\n..\nLib/site-packages\n', encoding='ascii')
+# Wheels include Qt's native DLLs and platform plugins for the target runtime.
+subprocess.run([sys.executable, '-m', 'pip', 'install', '--disable-pip-version-check', '--only-binary=:all:', '--target', str(RUNTIME / 'Lib' / 'site-packages'), 'PySide6-Essentials==6.8.3'], check=True)
 python = RUNTIME / 'python.exe'
 subprocess.run([str(python), '-m', 'unittest', 'discover', '-s', str(APP)], check=True, cwd=APP)
 # Verify startup from a Unicode path, using only the embedded runtime.
 probe = OUT / '\u4fbf\u643a\u7248 \u542f\u52a8\u6d4b\u8bd5'
 shutil.copytree(APP, probe)
 probe_python = probe / 'runtime' / 'python.exe'
+subprocess.run([str(probe_python), '-X', 'utf8', str(probe / 'desktop_pet.py'), '--smoke-test'], cwd=probe, check=True, timeout=60)
 # Exercise the actual BAT entry point as well as embedded Python's imports.
 # Suppress the browser only during this automated check.
 bat = probe / 'start.bat'
@@ -83,7 +86,7 @@ for folder in ('logs', 'voices'):
     if (APP / folder).exists():
         shutil.rmtree(APP / folder)
 (APP / 'settings.json').write_text(json.dumps({'ports': [], 'config': {'pet': False, 'qqVoice': False, 'petVoice': False}, 'activePort': None, 'autoSwitch': True, 'lastRoute': []}, indent=2), encoding='utf-8')
-(APP / 'START-HERE.txt').write_text('Windows 10/11 64-bit portable edition.\nExtract ALL files, then double-click start.bat.\nPython is included in runtime/. No installation or administrator access required.\nKeep the console open while using the application.\nIf the browser does not open: http://127.0.0.1:8765\nDo not overwrite your existing settings.json when upgrading.\n', encoding='utf-8')
+(APP / 'START-HERE.txt').write_text('Windows 10/11 64-bit portable edition.\nExtract ALL files. Double-click start-pet.bat for the desktop pet, or start.bat for the web terminal.\nPython and Qt are included in runtime/. No installation or administrator access required.\nKeep the console open while using the application.\nIf the browser does not open: http://127.0.0.1:8765\nDo not overwrite your existing settings.json when upgrading.\n', encoding='utf-8')
 result = OUT / 'fish-api-pro-windows-x64.zip'
 with zipfile.ZipFile(result, 'w', zipfile.ZIP_DEFLATED) as z:
     for item in APP.rglob('*'):
@@ -91,5 +94,5 @@ with zipfile.ZipFile(result, 'w', zipfile.ZIP_DEFLATED) as z:
             z.write(item, item.relative_to(OUT))
 checksum = hashlib.sha256(result.read_bytes()).hexdigest()
 (OUT / 'SHA256SUMS.txt').write_text(checksum + '  ' + result.name + '\n', encoding='ascii')
-print('Portable runtime, unit tests, Unicode path, BAT startup, authenticated HTTP, sessions and shutdown: PASSED')
+print('Portable runtime, unit tests, desktop pet rendering and chat, Unicode path, BAT startup, authenticated HTTP, sessions and shutdown: PASSED')
 print(result)
