@@ -1,0 +1,44 @@
+name: Windows portable package
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fish-api-pro/**'
+      - 'scripts/build_portable.py'
+      - '.github/workflows/portable.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: portable-main
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and test self-contained ZIP
+        run: python scripts/build_portable.py
+      - name: Save tested portable package
+        uses: actions/upload-artifact@v4
+        with:
+          name: fish-api-pro-windows-x64
+          path: |
+            dist/fish-api-pro-windows-x64.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+      - name: Publish download
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $tag = "portable-$env:GITHUB_RUN_NUMBER-$env:GITHUB_RUN_ATTEMPT"
+          gh release create $tag dist/fish-api-pro-windows-x64.zip dist/SHA256SUMS.txt --target "$env:GITHUB_SHA" --title "Windows portable $env:GITHUB_RUN_NUMBER" --notes "Windows 10/11 x64. Download fish-api-pro-windows-x64.zip, extract ALL files, then double-click start.bat. Embedded Python included; no installation required. Build validates unit tests, Unicode folder BAT startup, authenticated HTTP, session persistence and shutdown. Source code ZIP files do not include Python."
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
