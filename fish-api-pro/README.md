@@ -1,8 +1,12 @@
 # 大肥鱼 API 模型终端 Pro 1.0
 
-## 启动
-安装 Python 3.10 或更高版本（勾选 Add Python to PATH），解压后双击 start.bat。
-不附带 Python 运行时，无第三方 Python 依赖。也可运行 `python server.py`，访问 http://127.0.0.1:8765。
+## Windows 解压即用版
+下载 [fish-api-pro-windows-x64.zip](https://github.com/you-su/codex/releases/latest/download/fish-api-pro-windows-x64.zip)，适用 Windows 10/11 64 位。
+完整解压，打开 Fish-API-Pro 文件夹，双击 start.bat。包内 runtime/ 自带 Python，无需另外安装，也无需管理员权限。启动会打开浏览器；没有打开时访问 http://127.0.0.1:8765。
+请保留启动窗口，使用结束后关闭程序。不要在压缩包内部直接运行。
+
+## 源码版启动
+GitHub Code → Download ZIP 和 Releases 中的 Source code 仅包含源码，不含 Python。源码运行需要安装 Python 3.10+，然后双击 start.bat 或运行 `python server.py`。
 停止：Ctrl+C 或双击“关闭程序.bat”。
 
 ## 新增功能
