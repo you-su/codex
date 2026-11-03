@@ -1,0 +1,1 @@
+server.py：后端；index.html：界面；logo.svg：图标；settings.json：配置和会话；voices：保存音频后生成；logs：运行后生成。升级前备份个人数据。
