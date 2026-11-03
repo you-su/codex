@@ -1,0 +1,11 @@
+{
+  "ports": [],
+  "config": {
+    "pet": false,
+    "qqVoice": false,
+    "petVoice": false
+  },
+  "activePort": null,
+  "autoSwitch": true,
+  "lastRoute": []
+}
